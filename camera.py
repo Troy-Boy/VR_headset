@@ -9,6 +9,17 @@ import socketserver
 from threading import Condition
 from http import server
 
+PAGE="""\
+<html>
+<head>
+<title>Raspberry Pi - Surveillance Camera</title>
+</head>
+<body>
+<center><h1>Raspberry Pi - Surveillance Camera</h1></center>
+<center><img src="stream.mjpg" width="640" height="480"></center>
+</body>
+</html>
+"""
 
 class StreamingOutput(object):
     def __init__(self):
@@ -27,7 +38,6 @@ class StreamingOutput(object):
             self.buffer.seek(0)
         return self.buffer.write(buf)
 
-
 class StreamingHandler(server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
@@ -35,12 +45,12 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.send_header('Location', '/index.html')
             self.end_headers()
         elif self.path == '/index.html':
-            with open('stream.html', 'r', encoding='utf-8') as f:
-                self.send_response(200)
-                self.send_header('Content-Type', 'text/html')
-                self.send_header('Content-Length', len(f))
-                self.end_headers()
-                self.wfile.write(f)
+            content = PAGE.encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.send_header('Content-Length', len(content))
+            self.end_headers()
+            self.wfile.write(content)
         elif self.path == '/stream.mjpg':
             self.send_response(200)
             self.send_header('Age', 0)
